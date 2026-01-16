@@ -14,6 +14,7 @@ class AudioPlayerWidget extends StatefulWidget {
 
 class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   late final AudioPlayer _player;
+
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
   bool _isPlaying = false;
@@ -21,18 +22,25 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   @override
   void initState() {
     super.initState();
+
     _player = AudioPlayer();
+
     _player.onDurationChanged.listen((duration) {
+      if (!mounted) return;
       setState(() {
         _duration = duration;
       });
     });
+
     _player.onPositionChanged.listen((position) {
+      if (!mounted) return;
       setState(() {
         _position = position;
       });
     });
+
     _player.onPlayerComplete.listen((event) {
+      if (!mounted) return;
       setState(() {
         _isPlaying = false;
         _position = Duration.zero;
@@ -47,9 +55,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   Future<void> _togglePlay() async {
-    if (widget.audioPath == null) {
-      return;
-    }
+    if (widget.audioPath == null) return;
 
     if (_isPlaying) {
       await _player.pause();
@@ -57,6 +63,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       await _player.play(DeviceFileSource(widget.audioPath!));
     }
 
+    if (!mounted) return;
     setState(() {
       _isPlaying = !_isPlaying;
     });
@@ -73,8 +80,11 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       return const Text('Audio file not found.');
     }
 
-    final sliderMax = _duration.inMilliseconds.toDouble().clamp(1, double.infinity);
-    final sliderValue = _position.inMilliseconds.toDouble().clamp(0, sliderMax);
+    // Convert to double so Slider always gets double values
+    final double sliderMax =
+        _duration.inMilliseconds.toDouble().clamp(1.0, double.infinity);
+    final double sliderValue =
+        _position.inMilliseconds.toDouble().clamp(0.0, sliderMax);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,9 +100,10 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
               child: Slider(
                 value: sliderValue,
                 max: sliderMax,
-                onChanged: (value) async {
+                onChanged: (double value) async {
                   final position = Duration(milliseconds: value.toInt());
                   await _player.seek(position);
+                  if (!mounted) return;
                   setState(() {
                     _position = position;
                   });

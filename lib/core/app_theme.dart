@@ -16,10 +16,12 @@ class AppTheme {
         backgroundColor: Color(0xFF5D4037),
         foregroundColor: Colors.white,
       ),
-      cardTheme: CardTheme(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 2,
-      ),
+      cardTheme: const CardThemeData(
+  elevation: 0.5,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(16)),
+  ),
+),
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
